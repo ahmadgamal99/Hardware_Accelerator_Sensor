@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 translation_y.setText(last_x + "");
                 translation_z.setText(last_x + "");
 
-                String text = last_x + "," + last_y + "," + last_z;
+                String text = last_x + "," + last_y + "," + last_z + "\n";
                 byte[] text_byte = text.getBytes();
 
 
@@ -106,6 +106,12 @@ public class MainActivity extends AppCompatActivity {
                 rotation_y.setText(rotate_y + "");
                 rotation_z.setText(rotate_z + "");
 
+                String text = rotate_x + "," + rotate_y + "," + rotate_z + "\n";
+                byte[] text_byte = text.getBytes();
+
+
+                writeToFile(text_byte);
+
             }
         });
     }
@@ -127,33 +133,25 @@ public class MainActivity extends AppCompatActivity {
         gryscope.unregister();
     }
 
-    public boolean isExternalStorageWritable(){
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
-            return true;
-        }else{ return false;}
-    }
+
     public void writeToFile(byte[] text){
-        if (isExternalStorageWritable()){
-            File textFile = new File(Environment.getExternalStorageDirectory(),"result.txt");
-            try {
-                FileOutputStream fos = new FileOutputStream(textFile);
-                fos.write(text);
-                fos.close();
-                Toast.makeText(this, "saved !", Toast.LENGTH_SHORT).show();
-            }catch(IOException e)
-            {
-                e.printStackTrace();
-                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-
-            }
 
 
+
+        try {
+
+            FileOutputStream fileOutputStream = openFileOutput("result.txt", MODE_PRIVATE);
+            fileOutputStream.write(text);
+            fileOutputStream.close();
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    public boolean checkPermission(String permision){
-        int check = ContextCompat.checkSelfPermission(this,permision);
-        return (check == PackageManager.PERMISSION_GRANTED);
-    }
+
 }
 
