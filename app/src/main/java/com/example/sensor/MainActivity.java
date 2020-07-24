@@ -73,55 +73,15 @@ public class MainActivity extends AppCompatActivity {
 //                Toast.makeText(MainActivity.this, last_z + "Z-axis", Toast.LENGTH_SHORT).show();
 
 
-
                 translation_x.setText(last_x + "");
                 translation_y.setText(last_x + "");
                 translation_z.setText(last_x + "");
 
                 String text = last_x + "," + last_y + "," + last_z;
-                    byte[] text_byte = text.getBytes();;
-
-                    String state = Environment.getExternalStorageState();
-                    if (Environment.MEDIA_MOUNTED.equals(state)) {
-                        if (Build.VERSION.SDK_INT >= 23) {
-                            if (checkPermission()) {
-                                File sdcard = Environment.getExternalStorageDirectory();
-                                File dir = new File(sdcard.getAbsolutePath() + "/text/");
-                                dir.mkdir();
-                                File file = new File(dir, "sample.txt");
-                                FileOutputStream os = null;
-                                try {
-                                    os = new FileOutputStream(file);
-                                    os.write(text_byte);
-                                    os.close();
-                                    Toast.makeText(MainActivity.this, "saved", Toast.LENGTH_SHORT).show();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-
-                                }
-                            } else {
-                                requestPermission(); // Code for permission
-                            }
-                        } else {
-                            File sdcard = Environment.getExternalStorageDirectory();
-                            File dir = new File(sdcard.getAbsolutePath() + "/text/");
-                            dir.mkdir();
-                            File file = new File(dir, "result.txt");
-                            FileOutputStream os = null;
-                            try {
-                                os = new FileOutputStream(file);
-                                os.write(text_byte);
-                                os.close();
-                                Toast.makeText(MainActivity.this, "saved", Toast.LENGTH_SHORT).show();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
+                byte[] text_byte = text.getBytes();
 
 
-
+                writeToFile(text_byte);
             }
         });
 
@@ -152,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Methods
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
 
         accelerometer.register();
@@ -160,40 +120,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause(){
+    protected void onPause() {
         super.onPause();
 
         accelerometer.unregister();
         gryscope.unregister();
     }
 
-    private boolean checkPermission() {
-        int result = ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (result == PackageManager.PERMISSION_GRANTED) {
+    public boolean isExternalStorageWritable(){
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
             return true;
-        } else {
-            return false;
-        }
+        }else{ return false;}
     }
+    public void writeToFile(byte[] text){
+        if (isExternalStorageWritable()){
+            File textFile = new File(Environment.getExternalStorageDirectory(),"result.txt");
+            try {
+                FileOutputStream fos = new FileOutputStream(textFile);
+                fos.write(text);
+                fos.close();
+                Toast.makeText(this, "saved !", Toast.LENGTH_SHORT).show();
+            }catch(IOException e)
+            {
+                e.printStackTrace();
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 
-    private void requestPermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            Toast.makeText(MainActivity.this, "Write External Storage permission allows us to create files. Please allow this permission in App Settings.", Toast.LENGTH_LONG).show();
-        } else {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_REQUEST_CODE:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.e("value", "Permission Granted, Now you can use local drive .");
-            } else {
-                Log.e("value", "Permission Denied, You cannot use local drive .");
             }
-            break;
+
+
         }
+    }
+
+    public boolean checkPermission(String permision){
+        int check = ContextCompat.checkSelfPermission(this,permision);
+        return (check == PackageManager.PERMISSION_GRANTED);
     }
 }
+
